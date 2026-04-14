@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>計算機表單</title>
+</head>
+<body>
+    
+    <form method="post">
+        請輸入 x：
+        <input type="number" name="x" required>
+
+        <br><br>請輸入運算符：
+        <input type="text" name="opt" placeholder="+ - * /" required>
+
+        <br><br>請輸入 y：
+        <input type="number" name="y" required>
+
+        <br><br><input type="submit" value="開始計算">
+    </form>
+
+    <br>
+    <h3>{{ result }}</h3>
+
+</body>
+</html>

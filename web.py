@@ -54,7 +54,6 @@ def search_page():
     page += "<br><br><a href='/'>返回首頁</a>"
     return page
 
-
 # === 這是按下查詢後，顯示「結果」的頁面 ===
 @app.route('/search')
 def search_teacher():

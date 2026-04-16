@@ -3,32 +3,23 @@ import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-# 判斷是在 Vercel 還是本地
-if os.path.exists('serviceAccountKey.json'):
-    # 本地環境：讀取檔案
-    cred = credentials.Certificate('serviceAccountKey.json')
-else:
-    # 雲端環境：從環境變數讀取 JSON 字串
-    firebase_config = os.getenv('FIREBASE_CONFIG')
-    cred_dict = json.loads(firebase_config)
+# ======= Firebase 連線設定 (支援 Vercel 與本地端) =======
+# 嘗試從環境變數讀取金鑰 (Vercel 用)
+firebase_key = os.environ.get('FIREBASE_KEY')
+
+if firebase_key:
+    # 如果在 Vercel 上，把字串轉換成字典來讀取
+    cred_dict = json.loads(firebase_key)
     cred = credentials.Certificate(cred_dict)
+else:
+    # 如果在你的本地端電腦，就一樣讀取檔案
+    cred = credentials.Certificate("serviceAccountKey.json")
 
-firebase_admin.initialize_app(cred)
-
-
-from flask import Flask, render_template, request
-from datetime import datetime
-import random
-
-# === 請把這段「新增」在這裡 ===
-import firebase_admin
-from firebase_admin import credentials, firestore
-
-cred = credentials.Certificate("serviceAccountKey.json")
+# 初始化 Firebase
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
-db = firestore.client()  # 這裡就是定義 db！
-# ==============================
+db = firestore.client()
+# =======================================================
 
 app = Flask(__name__)
 

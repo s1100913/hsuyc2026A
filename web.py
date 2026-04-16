@@ -7,16 +7,19 @@ import datetime
 import random
 
 # ======= Firebase 連線設定 =======
-# 嘗試從環境變數讀取金鑰 (Vercel 用)
 firebase_key = os.environ.get('FIREBASE_KEY')
 
 if firebase_key:
-    # 如果在 Vercel 上，把字串轉換成字典來讀取
+    # 如果有抓到變數，就轉換成字典
     cred_dict = json.loads(firebase_key)
     cred = credentials.Certificate(cred_dict)
 else:
-    # 如果在你的本地端電腦，就一樣讀取檔案
-    cred = credentials.Certificate("serviceAccountKey.json")
+    # 如果沒抓到變數，檢查是不是在本地端（有沒有檔案）
+    if os.path.exists("serviceAccountKey.json"):
+        cred = credentials.Certificate("serviceAccountKey.json")
+    else:
+        # 如果在 Vercel 上既沒有變數，也沒有檔案，就直接報錯！
+        raise ValueError("❌ 嚴重錯誤：Vercel 完全抓不到 FIREBASE_KEY 環境變數！請確認 Vercel 後台設定。")
 
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)

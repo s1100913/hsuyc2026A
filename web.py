@@ -9,11 +9,17 @@ if os.path.exists('serviceAccountKey.json'):
     cred = credentials.Certificate('serviceAccountKey.json')
 else:
     # 雲端環境：從環境變數讀取 JSON 字串
-    firebase_config = os.getenv('FIREBASE_CONFIG')
+    # 🎯 已經幫你改成對應你 Vercel 後台的 FIREBASE_CONFIG
+    firebase_config = os.environ.get('FIREBASE_CONFIG')
     cred_dict = json.loads(firebase_config)
     cred = credentials.Certificate(cred_dict)
 
-firebase_admin.initialize_app(cred)
+# 初始化 Firebase (加入防重複啟動機制)
+if not firebase_admin._apps:
+    firebase_admin.initialize_app(cred)
+
+# ⚠️ 加上這行！宣佈 db 是誰，底下的查詢才有用
+db = firestore.client()
 
 
 from flask import Flask, render_template, request

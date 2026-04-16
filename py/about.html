@@ -10,6 +10,45 @@
 		h2 {color:#33ff33; font-size:40px;}
 	</style>
 
+	<style>
+	    .search-container {
+	        background-color: #d7d5e6;
+	        padding: 20px;
+	        border-radius: 8px;
+	        max-width: 400px;
+	        margin: 20px auto;
+	        text-align: center;
+	    }
+	    .search-input {
+	        width: 80%;
+	        padding: 10px;
+	        border: 1px solid #a4a1bf;
+	        border-radius: 4px;
+	        color: black;
+	        margin-bottom: 10px;
+	    }
+	    .search-btn {
+	        background-color: #b8b2d1;
+	        color: black;
+	        border: none;
+	        padding: 10px 20px;
+	        border-radius: 4px;
+	        cursor: pointer;
+	        font-weight: bold;
+	    }
+	    .search-btn:hover {
+	        background-color: #a4a1bf;
+	    }
+	</style>
+
+<div class="search-container">
+    <form action="/search" method="GET">
+        <input type="text" class="search-input" name="keyword" placeholder="請輸入老師名字..." required>
+        <br>
+        <button type="submit" class="search-btn">查詢研究室</button>
+    </form>
+</div>
+
 	<script>
 		function change1() {
   			document.getElementById("pic").src = "static/mountain.jpg";

@@ -20,6 +20,19 @@ from flask import Flask, render_template, request
 from datetime import datetime
 import random
 
+# === 請把這段「新增」在這裡 ===
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+cred = credentials.Certificate("serviceAccountKey.json")
+if not firebase_admin._apps:
+    firebase_admin.initialize_app(cred)
+db = firestore.client()  # 這裡就是定義 db！
+# ==============================
+
+app = Flask(__name__)
+
+# ... (下面是你原本的 @app.route 等等，都不用動) ...
 app = Flask(__name__)
 
 @app.route("/")
@@ -33,9 +46,50 @@ def index():
     link += "<a href=/math>數學運算</a><br>"
     link += "<a href=/cup>擲茭</a><br>"
     link += "<br><a href=/read>讀取Firestore資料(根據lab遞減排序,取前4)</a><br>"
-
+    # === 新增這行：點擊後會前往 /search_page 頁面 ===
+    link += "<a href=/search_page>查詢老師與研究室</a><br>"
     return link
 
+# === 這是點擊連結後，進入的「輸入關鍵字」頁面 ===
+@app.route('/search_page')
+def search_page():
+    page = "<h2>查詢老師與研究室</h2>"
+    page += "<form action='/search' method='GET'>"
+    page += "請輸入老師名字關鍵字：<input type='text' name='keyword' required> "
+    page += "<button type='submit'>開始查詢</button>"
+    page += "</form>"
+    page += "<br><br><a href='/'>返回首頁</a>"
+    return page
+
+# === 這是按下查詢後，顯示「結果」的頁面 ===
+@app.route('/search')
+def search_teacher():
+    keyword = request.args.get('keyword', '')
+    result_page = f"<h2>「{keyword}」的查詢結果：</h2>"
+    
+    if keyword:
+        # 🎯 修正 1：換成你真正的集合名稱
+        teachers_ref = db.collection('靜宜資管2026a')
+        docs = teachers_ref.stream()
+
+        found = False 
+        
+        for doc in docs:
+            teacher_data = doc.to_dict()
+            teacher_name = teacher_data.get('name', '')
+            
+            if keyword in teacher_name:
+                # 🎯 修正 2：換成你真正的研究室欄位名稱 'lab'
+                room = teacher_data.get('lab', '未提供研究室')
+                result_page += f"<p><strong>{teacher_name}</strong> 老師 - 研究室：{room}</p>"
+                found = True
+        
+        if not found:
+            result_page += "<p>找不到符合條件的老師！</p>"
+
+    result_page += "<br><br><a href='/search_page'>繼續查詢</a> | <a href='/'>返回首頁</a>"
+    return result_page
+    
 @app.route("/read")
 def read():
     db = firestore.client()

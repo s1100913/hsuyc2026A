@@ -2,8 +2,11 @@ import os
 import json
 import firebase_admin
 from firebase_admin import credentials, firestore
+from flask import Flask, render_template, request
+import datetime
+import random
 
-# ======= Firebase 連線設定 (支援 Vercel 與本地端) =======
+# ======= Firebase 連線設定 =======
 # 嘗試從環境變數讀取金鑰 (Vercel 用)
 firebase_key = os.environ.get('FIREBASE_KEY')
 
@@ -15,15 +18,11 @@ else:
     # 如果在你的本地端電腦，就一樣讀取檔案
     cred = credentials.Certificate("serviceAccountKey.json")
 
-# 初始化 Firebase
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 db = firestore.client()
-# =======================================================
+# =================================
 
-app = Flask(__name__)
-
-# ... (下面是你原本的 @app.route 等等，都不用動) ...
 app = Flask(__name__)
 
 @app.route("/")

@@ -11,8 +11,7 @@ if os.path.exists('serviceAccountKey.json'):
     # 本地環境：讀取檔案
     cred = credentials.Certificate('serviceAccountKey.json')
 else:
-    # 雲端環境：從環境變數讀取 JSON 字串
-    # 🎯 已經幫你改成對應你 Vercel 後台的 FIREBASE_CONFIG
+   
     firebase_config = os.environ.get('FIREBASE_CONFIG')
     cred_dict = json.loads(firebase_config)
     cred = credentials.Certificate(cred_dict)
@@ -21,7 +20,6 @@ else:
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
-# ⚠️ 加上這行！宣佈 db 是誰，底下的查詢才有用
 db = firestore.client()
 
 
@@ -63,7 +61,6 @@ def search_teacher():
     result_page = f"<h2>「{keyword}」的查詢結果：</h2>"
     
     if keyword:
-        # 🎯 修正 1：換成你真正的集合名稱
         teachers_ref = db.collection('靜宜資管2026a')
         docs = teachers_ref.stream()
 
@@ -74,7 +71,6 @@ def search_teacher():
             teacher_name = teacher_data.get('name', '')
             
             if keyword in teacher_name:
-                # 🎯 修正 2：換成你真正的研究室欄位名稱 'lab'
                 room = teacher_data.get('lab', '未提供研究室')
                 result_page += f"<p><strong>{teacher_name}</strong> 老師 - 研究室：{room}</p>"
                 found = True
@@ -99,7 +95,17 @@ def read():
 
 @app.route("/sp1")
 def sp1():
-    R = "20260421"
+    R = ""
+    url = "https://hsuyc2026-a-po1l.vercel.app/about"
+    Data = requests.get(url)
+    Data.encoding = "utf-8"
+    #print(Data.text)
+    sp = BeautifulSoup(Data.text, "html.parser")
+    result=sp.select("td a")
+    print(result)
+
+    for item in result:
+        R += item.text + "<br>" + item.get("href") + "<br><br>"
     return R
 
 @app.route("/mis")

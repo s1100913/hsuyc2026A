@@ -1,3 +1,6 @@
+import requests
+from bs4 import BeautifulSoup
+
 import os
 import json
 import firebase_admin
@@ -93,6 +96,11 @@ def read():
         Temp += str(doc.to_dict()) + "<br>"
 
     return Temp
+
+@app.route("/sp1")
+def sp1():
+    R = "20260421"
+    return R
 
 @app.route("/mis")
 def course():

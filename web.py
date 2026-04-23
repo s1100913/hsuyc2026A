@@ -39,11 +39,10 @@ def index():
     link += "<a href=/math>數學運算</a><br>"
     link += "<a href=/cup>擲茭</a><br>"
     link += "<br><a href=/read>讀取Firestore資料(根據lab遞減排序,取前4)</a><br>"
-    # === 新增這行：點擊後會前往 /search_page 頁面 ===
     link += "<a href=/search_page>查詢老師與研究室</a><br>"
+    link += "<br><a href=/movies>查詢即將上映電影</a><br>"
     return link
 
-# === 這是點擊連結後，進入的「輸入關鍵字」頁面 ===
 @app.route('/search_page')
 def search_page():
     page = "<h2>查詢老師與研究室</h2>"
@@ -54,7 +53,6 @@ def search_page():
     page += "<br><br><a href='/'>返回首頁</a>"
     return page
 
-# === 這是按下查詢後，顯示「結果」的頁面 ===
 @app.route('/search')
 def search_teacher():
     keyword = request.args.get('keyword', '')
@@ -200,6 +198,52 @@ def cup():
         }
                 
     return render_template('cup.html', result=result)
+
+@app.route("/movies")
+def upcoming_movies():
+    try:
+        url = "http://www.atmovies.com.tw/movie/next/"
+        
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        
+        response = requests.get(url, headers=headers)
+        response.encoding = "utf-8" 
+        
+        soup = BeautifulSoup(response.text, "html.parser")
+    
+        all_links = soup.find_all("a")
+        
+        result_html = "<h2>即將上映電影</h2>"
+        result_html += "<ul style='line-height: 1.8; font-size: 18px;'>"
+        
+        added_urls = set()
+        count = 0
+        
+        for item in all_links:
+            title = item.text.strip()
+            href = item.get("href", "")
+            
+            if title and href.startswith("/movie/f"):
+                full_link = f"http://www.atmovies.com.tw{href}"
+                
+                if full_link not in added_urls:
+                    result_html += f"<li><a href='{full_link}' target='_blank'>{title}</a></li>"
+                    added_urls.add(full_link)
+                    count += 1
+                    
+        result_html += "</ul>"
+        
+        if count == 0:
+            result_html += "<p style='color:red;'>有成功連線，但沒有抓出任何電影，可能是網站大改版了！</p>"
+            
+        result_html += "<br><a href='/'>返回首頁</a>"
+        
+        return result_html
+        
+    except Exception as e:
+        return f"<h2>爬蟲發生錯誤！</h2><p>錯誤訊息：{e}</p><br><a href='/'>返回首頁</a>"
 
 if __name__ == "__main__":
 	app.run(debug=True)

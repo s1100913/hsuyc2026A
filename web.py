@@ -10,13 +10,16 @@ from firebase_admin import credentials, firestore
 if os.path.exists('serviceAccountKey.json'):
     # 本地環境：讀取檔案
     cred = credentials.Certificate('serviceAccountKey.json')
-else:
-   
-    firebase_config = os.environ.get('FIREBASE_CONFIG')
-    cred_dict = json.loads(firebase_config)
-    cred = credentials.Certificate(cred_dict)
 
-# 初始化 Firebase (加入防重複啟動機制)
+else:
+    firebase_config = os.environ.get('FIREBASE_CONFIG')
+    if firebase_config is not None:
+        cred_dict = json.loads(firebase_config)
+        cred = credentials.Certificate(cred_dict)
+    else:
+        print("錯誤：找不到 serviceAccountKey.json 也找不到環境變數 FIREBASE_CONFIG")
+        cred = credentials.Certificate('serviceAccountKey.json')
+
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
@@ -41,7 +44,43 @@ def index():
     link += "<br><a href=/read>讀取Firestore資料(根據lab遞減排序,取前4)</a><br>"
     link += "<a href=/search_page>查詢老師與研究室</a><br>"
     link += "<br><a href=/movies>查詢即將上映電影</a><br>"
+    link += "<br><a href=/movie>讀取開眼電影即將上映影片，寫入Firestore</a><br>"
+
     return link
+
+@app.route("/movie2")
+def movie2():
+  url = "http://www.atmovies.com.tw/movie/next/"
+  Data = requests.get(url)
+  Data.encoding = "utf-8"
+  sp = BeautifulSoup(Data.text, "html.parser")
+  result=sp.select(".filmListAllX li")
+  lastUpdate = sp.find("div", class_="smaller09").text[5:]
+
+  for item in result:
+    picture = item.find("img").get("src").replace(" ", "")
+    title = item.find("div", class_="filmtitle").text
+    movie_id = item.find("div", class_="filmtitle").find("a").get("href").replace("/", "").replace("movie", "")
+    hyperlink = "http://www.atmovies.com.tw" + item.find("div", class_="filmtitle").find("a").get("href")
+    show = item.find("div", class_="runtime").text.replace("上映日期：", "")
+    show = show.replace("片長：", "")
+    show = show.replace("分", "")
+    showDate = show[0:10]
+    showLength = show[13:]
+
+    doc = {
+        "title": title,
+        "picture": picture,
+        "hyperlink": hyperlink,
+        "showDate": showDate,
+        "showLength": showLength,
+        "lastUpdate": lastUpdate
+      }
+
+    db = firestore.client()
+    doc_ref = db.collection("電影2A").document(movie_id)
+    doc_ref.set(doc)    
+  return "近期上映電影已爬蟲及存檔完畢，網站最近更新日期為：" + lastUpdate 
 
 @app.route('/search_page')
 def search_page():

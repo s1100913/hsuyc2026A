@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>近期上映電影</title>
+    <style>
+        body {
+            background-color: #d7d5e6; /* 淺紫背景 */
+            color: black; /* 黑色字體確保高易讀性 */
+            font-family: '微軟正黑體', sans-serif;
+            padding: 30px;
+            margin: 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .update-time {
+            font-size: 0.9em;
+            color: #333;
+        }
+        .movie-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+        }
+        .movie-card {
+            background-color: #b8b2d1; /* 卡片主色 */
+            border: 2px solid #a4a1bf; /* 卡片邊框 */
+            border-radius: 12px;
+            width: 260px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+        .movie-card:hover {
+            transform: translateY(-5px); /* 滑鼠游標移過去時會有浮起效果 */
+        }
+        .movie-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .movie-title {
+            font-size: 1.25em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+        .movie-info {
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        .movie-link {
+            margin-top: auto; 
+            padding-top: 15px;
+            text-align: center;
+        }
+        .movie-link a {
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+            background-color: #d7d5e6;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #a4a1bf;
+            transition: background-color 0.2s;
+        }
+        .movie-link a:hover {
+            background-color: #a4a1bf;
+        }
+        .nav-link {
+            display: block;
+            text-align: center;
+            margin-top: 40px;
+        }
+        .nav-link a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>近期上映電影</h2>
+        <div class="update-time">資料更新日期：{{ lastUpdate }}</div>
+    </div>
+    
+    <div class="movie-container">
+        <!-- Jinja2 迴圈動態產生卡片 -->
+        {% for movie in movies %}
+        <div class="movie-card">
+            <img src="{{ movie.picture }}" alt="{{ movie.title }}">
+            <div class="movie-title">{{ movie.title }}</div>
+            <div class="movie-info">📅 上映日期：{{ movie.showDate }}</div>
+            <div class="movie-info">⏳ 片長：{{ movie.showLength }} 分鐘</div>
+            <div class="movie-link">
+                <a href="{{ movie.hyperlink }}" target="_blank">查看詳情</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="nav-link">
+        <a href="/">返回首頁</a>
+    </div>
+
+</body>
+</html>

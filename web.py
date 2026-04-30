@@ -1,3 +1,4 @@
+import random
 import requests
 from bs4 import BeautifulSoup
 
@@ -44,43 +45,72 @@ def index():
     link += "<br><a href=/read>讀取Firestore資料(根據lab遞減排序,取前4)</a><br>"
     link += "<a href=/search_page>查詢老師與研究室</a><br>"
     link += "<br><a href=/movies>查詢即將上映電影</a><br>"
-    link += "<br><a href=/movie>讀取開眼電影即將上映影片，寫入Firestore</a><br>"
-
+    link += "<br><a href=/movie2>讀取開眼電影即將上映影片，寫入Firestore</a><br>"
+    link += "<a href='/movie3'>查詢即將上映電影資訊 (關鍵字查詢)</a><br>"
     return link
 
 @app.route("/movie2")
 def movie2():
-  url = "http://www.atmovies.com.tw/movie/next/"
-  Data = requests.get(url)
-  Data.encoding = "utf-8"
-  sp = BeautifulSoup(Data.text, "html.parser")
-  result=sp.select(".filmListAllX li")
-  lastUpdate = sp.find("div", class_="smaller09").text[5:]
-
-  for item in result:
-    picture = item.find("img").get("src").replace(" ", "")
-    title = item.find("div", class_="filmtitle").text
-    movie_id = item.find("div", class_="filmtitle").find("a").get("href").replace("/", "").replace("movie", "")
-    hyperlink = "http://www.atmovies.com.tw" + item.find("div", class_="filmtitle").find("a").get("href")
-    show = item.find("div", class_="runtime").text.replace("上映日期：", "")
-    show = show.replace("片長：", "")
-    show = show.replace("分", "")
-    showDate = show[0:10]
-    showLength = show[13:]
-
-    doc = {
-        "title": title,
-        "picture": picture,
-        "hyperlink": hyperlink,
-        "showDate": showDate,
-        "showLength": showLength,
-        "lastUpdate": lastUpdate
-      }
+    url = "http://www.atmovies.com.tw/movie/next/"
+    Data = requests.get(url)
+    Data.encoding = "utf-8"
+    sp = BeautifulSoup(Data.text, "html.parser")
+    result = sp.select(".filmListAllX li")
+    lastUpdate = sp.find("div", class_="smaller09").text[5:]
 
     db = firestore.client()
-    doc_ref = db.collection("電影2A").document(movie_id)
-    doc_ref.set(doc)    
-  return "近期上映電影已爬蟲及存檔完畢，網站最近更新日期為：" + lastUpdate 
+    batch = db.batch()
+
+    for item in result:
+        picture = item.find("img").get("src").replace(" ", "")
+        title = item.find("div", class_="filmtitle").text
+        
+        a_tag = item.find("div", class_="filmtitle").find("a")
+        movie_id = a_tag.get("href").replace("/", "").replace("movie", "")
+        hyperlink = "http://www.atmovies.com.tw" + a_tag.get("href")
+        
+        runtime_div = item.find("div", class_="runtime")
+        if runtime_div:
+            show = runtime_div.text.replace("上映日期：", "").replace("片長：", "").replace("分", "")
+            showDate = show[0:10] if len(show) >= 10 else "未知"
+            showLength = show[13:] if len(show) > 13 else "未知"
+        else:
+            showDate = "未知"
+            showLength = "未知"
+
+        doc = {
+            "title": title,
+            "picture": picture,
+            "hyperlink": hyperlink,
+            "showDate": showDate,
+            "showLength": showLength,
+            "lastUpdate": lastUpdate
+        }
+
+        doc_ref = db.collection("電影2A").document(movie_id)
+        batch.set(doc_ref, doc)  
+
+    batch.commit()
+    
+    # 依照需求，這裡只回傳更新日期的純文字
+    return "近期上映電影已爬蟲及存檔完畢，網站最近更新日期為：" + lastUpdate
+
+@app.route("/movie3")
+def movie3():
+    keyword = request.args.get("keyword", "")
+    movies_list = []
+    
+    if keyword:
+        db = firestore.client()
+        docs = db.collection("電影2A").stream()
+        
+        for doc in docs:
+            movie_data = doc.to_dict()
+            # 判斷輸入的關鍵字是否包含在電影標題中
+            if keyword in movie_data.get("title", ""):
+                movies_list.append(movie_data)
+                
+    return render_template("movie3.html", movies=movies_list, keyword=keyword)
 
 @app.route('/search_page')
 def search_page():

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>縣市天氣查詢</title>
+    <style>
+        body {
+            font-family: '微軟正黑體', sans-serif;
+            background-color: #f8f8fa;
+            color: black; 
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-top: 10px solid #b8b2d1; 
+        }
+        h1 { color: #a4a1bf; }
+        .search-box {
+            background-color: #d7d5e6; 
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #b8b2d1;
+            border-radius: 5px;
+            width: 60%;
+        }
+        button {
+            background-color: #b8b2d1;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background-color: #a4a1bf; }
+        .result-card {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f0f0f5;
+            border-radius: 10px;
+        }
+        .error { color: #8b0000; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1> 縣市天氣查詢</h1>
+        
+        <div class="search-box">
+            <form method="POST">
+                <input type="text" name="city_name" placeholder="請輸入縣市（如：嘉義市）" value="{{ search_city }}" required>
+                <button type="submit">查詢</button>
+            </form>
+        </div>
+
+        {% if error_msg %}
+            <p class="error">{{ error_msg }}</p>
+        {% endif %}
+
+        {% if info %}
+            <div class="result-card">
+                <h2> {{ info.city }}</h2>
+                <p><strong>今日天氣：</strong> {{ info.status }}</p>
+                <p><strong>降雨機率：</strong> {{ info.rain }}%</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

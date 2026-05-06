@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台中市交通安全查詢 - 靜宜大學資管系作業</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f8fa;
+            color: black;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        h1 {
+            color: #a4a1bf; 
+            text-align: center;
+            border-bottom: 3px solid #d7d5e6;
+            padding-bottom: 10px;
+        }
+        .search-section {
+            background-color: #d7d5e6; 
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        input[type="text"] {
+            padding: 12px;
+            border: 1px solid #b8b2d1;
+            border-radius: 8px;
+            width: 60%;
+            font-size: 16px;
+        }
+        button {
+            background-color: #b8b2d1; 
+            color: black;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #a4a1bf;
+            transform: translateY(-2px);
+        }
+        .result-item {
+            background: white;
+            border-left: 6px solid #b8b2d1;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        .error {
+            color: #8b0000;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1> 台中市路口交通事故查詢</h1>
+        
+        <div class="search-section">
+            <form method="POST">
+                <div class="input-group">
+                    <input type="text" name="road_name" placeholder="請輸入路名（如：臺灣大道）" value="{{ search_road }}" required>
+                    <button type="submit">開始查詢</button>
+                </div>
+            </form>
+        </div>
+
+        {% if error_msg %}
+            <p class="error"> {{ error_msg }}</p>
+        {% endif %}
+
+        {% if search_road %}
+            <div class="results">
+                <h3> 關於「{{ search_road }}」的查詢結果：</h3>
+                {% if results %}
+                    {% for item in results %}
+                        <div class="result-item">
+                            <strong> {{ item.get('路口名稱') }}</strong><br>
+                            發生件數：{{ item.get('總件數') }} 件<br>
+                            主要肇因：{{ item.get('主要肇因') }}<br>
+                            <small>死傷統計：死亡 {{ item.get('死亡人數') }} / 受傷 {{ item.get('受傷人數') }}</small>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>目前查無相關路口資料，請更換關鍵字再試試看。</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

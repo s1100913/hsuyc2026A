@@ -1,3 +1,9 @@
+from flask import Flask, render_template, request
+import requests
+import json
+import urllib3
+import time
+
 import random
 import requests
 from bs4 import BeautifulSoup
@@ -31,7 +37,6 @@ from flask import Flask, render_template, request
 from datetime import datetime
 
 app = Flask(__name__)
-
 @app.route("/")
 def index():
     link = "<h1>歡迎進入許允蓁的首頁</h1>"
@@ -47,7 +52,70 @@ def index():
     link += "<br><a href=/movies>查詢即將上映電影</a><br>"
     link += "<br><a href=/movie2>讀取開眼電影即將上映影片，寫入Firestore</a><br>"
     link += "<a href='/movie3'>查詢即將上映電影資訊 (關鍵字查詢)</a><br>"
+    link += "<a href='/traffic'>台中市十大肇事路口查詢</a><br>"
+    link += "<a href='/weather'>查詢縣市天氣</a><br>"
     return link
+
+@app.route('/weather', methods=['GET', 'POST'])
+def weather_query():
+    weather_info = None
+    search_city = ""
+    error_msg = ""
+
+    if request.method == 'POST':
+        search_city = request.form.get('city_name')
+        
+        if search_city:
+            search_city = search_city.replace("台", "臺")
+            
+            try:
+                with open('py/weather.json', 'r', encoding='utf-8') as file:
+                    json_data = json.load(file)
+                
+                locations = json_data["records"]["location"]
+                for loc in locations:
+                    if loc["locationName"] == search_city:
+                        weather_info = {
+                            "city": loc["locationName"],
+                            "status": loc["weatherElement"][0]["time"][0]["parameter"]["parameterName"],
+                            "rain": loc["weatherElement"][1]["time"][0]["parameter"]["parameterName"]
+                        }
+                        break
+                
+                if not weather_info:
+                    error_msg = f"找不到「{search_city}」的天氣資料，請確認輸入是否正確。"
+                        
+            except FileNotFoundError:
+                error_msg = "系統錯誤：找不到 weather.json 檔案，請確認檔案位置！"
+            except Exception as e:
+                error_msg = f"發生錯誤：{e}"
+
+    return render_template('weather.html', info=weather_info, search_city=search_city, error_msg=error_msg)
+
+@app.route('/traffic', methods=['GET', 'POST'])
+def traffic_query():
+    results = []
+    search_road = ""
+    error_msg = ""
+
+    if request.method == 'POST':
+        search_road = request.form.get('road_name')
+        
+        if search_road:
+            try:
+                with open('py/data.json', 'r', encoding='utf-8') as file:
+                    data_list = json.load(file) 
+                    
+                for item in data_list:
+                    if search_road in item.get("路口名稱", ""):
+                        results.append(item)
+                        
+            except FileNotFoundError:
+                error_msg = "系統錯誤：找不到 py/data.json 檔案！"
+            except Exception as e:
+                error_msg = f"發生錯誤：{e}"
+
+    return render_template('traffic.html', results=results, search_road=search_road, error_msg=error_msg)
 
 @app.route("/movie2")
 def movie2():
@@ -92,7 +160,6 @@ def movie2():
 
     batch.commit()
     
-    # 依照需求，這裡只回傳更新日期的純文字
     return "近期上映電影已爬蟲及存檔完畢，網站最近更新日期為：" + lastUpdate
 
 @app.route("/movie3")

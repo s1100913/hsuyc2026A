@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>許允蓁的首頁</title>
+    <style>
+body {
+    background-color: #d7d5e6; 
+    font-family: "微軟正黑體", Arial, sans-serif;
+    text-align: center;
+    color: #4a485c;
+    padding: 20px;
+}
+
+h1 {
+    color: #4a485c;
+    margin-bottom: 30px;
+}
+
+.menu-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    width: 90%;
+    max-width: 650px;
+    margin: 0 auto;
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px; 
+    text-decoration: none; 
+    color: #5c5970; 
+    font-size: 15px;
+    font-weight: bold;
+    background-color: #FFFFFF; 
+    border: 2px solid #a4a1bf;
+    border-radius: 8px; 
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05); 
+    transition: all 0.3s ease; 
+}
+
+.menu-item:hover {
+    background-color: #b8b2d1; 
+    color: #FFFFFF; 
+    transform: translateY(-2px); 
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.15);
+}
+    </style>
+</head>
+<body>
+
+    <h1>歡迎進入許允蓁的首頁</h1>
+
+    <div class="menu-container">
+        <a class="menu-item" href="/mis">課程</a>
+        <a class="menu-item" href="/today">今天日期</a>
+        <a class="menu-item" href="/about">關於允蓁</a>
+        <a class="menu-item" href="/welcome?u=允蓁&dep=靜宜企管">GET傳值</a>
+        <a class="menu-item" href="/account">POST傳值(帳號密碼)</a>
+        <a class="menu-item" href="/math">數學運算</a>
+        <a class="menu-item" href="/cup">擲茭</a>
+        <a class="menu-item" href="/read">讀取Firestore資料(根據lab遞減排序,取前4)</a>
+        <a class="menu-item" href="/search_page">查詢老師與研究室</a>
+        <a class="menu-item" href="/movies">查詢即將上映電影</a>
+        <a class="menu-item" href="/movie2">讀取開眼電影即將上映影片，寫入Firestore</a>
+        <a class="menu-item" href="/movie3">查詢即將上映電影資訊 (關鍵字查詢)</a>
+        <a class="menu-item" href="/traffic">台中市十大肇事路口查詢</a>
+        <a class="menu-item" href="/weather">查詢縣市天氣</a>
+        <a class="menu-item" href="/rate">本週新片進DB</a>
+    </div>
+
+</body>
+</html>

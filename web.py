@@ -39,6 +39,7 @@ from datetime import datetime
 app = Flask(__name__)
 @app.route("/")
 def index():
+    return render_template("index.html")
     link = "<h1>歡迎進入許允蓁的首頁</h1>"
     link += "<a href=/mis>課程</a><br>"
     link += "<a href=/today>今天日期</a><br>"

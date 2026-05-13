@@ -58,29 +58,27 @@ def index():
     link += "<a href='/rate'>本週新片進DB</a><br>"
     return link
 
-@app.route("/webhook", methods=["POST"])
-def webhook():
+@app.route("/webhook2", methods=["POST"])
+def webhook2():
     req = request.get_json(force=True)
     action = req.get("queryResult", {}).get("action")
     
     if action == "rateChoice":
         rate = req["queryResult"]["parameters"].get("rate")
-
-        movies_ref = db.collection("本週新片含分級")
         
+        movies_ref = db.collection("本週新片含分級")
         query = movies_ref.where("rate", "==", rate).stream()
         
         movie_list = []
         for doc in query:
-            movie_data = doc.to_dict()
-            movie_list.append(movie_data.get("title", "未知片名"))
-            
+            movie_list.append(doc.to_dict().get("title", "未知片名"))
+        
         if movie_list:
             movies_str = "、\n".join(movie_list)
-            info = f"您好！您選擇的電影分級是：{rate}，本週符合條件的片單有：\n\n{movies_str}"
+            info = f"我是許允蓁設計的電影聊天機器人,您選擇的電影分級是：{rate}，相關電影：\n\n{movies_str}"
         else:
-            info = f"{user_name} 您好！本週目前沒有 {rate} 的新電影喔！"
-
+            info = f"我是許允蓁設計的電影聊天機器人,本週目前沒有 {rate} 的新電影喔！"
+            
     else:
         info = "我不確定你想執行的動作是什麼呢。"
 

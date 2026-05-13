@@ -60,6 +60,34 @@ def index():
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
+    req = request.get_json(force=True)
+    action = req.get("queryResult", {}).get("action")
+    
+    if action == "rateChoice":
+        rate = req["queryResult"]["parameters"].get("rate")
+
+        movies_ref = db.collection("本週新片含分級")
+        
+        query = movies_ref.where("rate", "==", rate).stream()
+        
+        movie_list = []
+        for doc in query:
+            movie_data = doc.to_dict()
+            movie_list.append(movie_data.get("title", "未知片名"))
+            
+        if movie_list:
+            movies_str = "、\n".join(movie_list)
+            info = f"您好！您選擇的電影分級是：{rate}，本週符合條件的片單有：\n\n{movies_str}"
+        else:
+            info = f"{user_name} 您好！本週目前沒有 {rate} 的新電影喔！"
+
+    else:
+        info = "我不確定你想執行的動作是什麼呢。"
+
+    return make_response(jsonify({"fulfillmentText": info}))
+
+@app.route("/webhook", methods=["POST"])
+def webhook():
     # build a request object
     req = request.get_json(force=True)
     # fetch queryResult from json

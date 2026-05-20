@@ -41,6 +41,8 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
     link = "<h1>歡迎進入許允蓁的首頁</h1>"
+    link += "<a href='https://bot.dialogflow.com/你的專屬ID' target='_blank'><b>[聊天機器人] Web Demo 測試連結</b></a><br><br>"
+    
     link += "<a href=/mis>課程</a><br>"
     link += "<a href=/today>今天日期</a><br>"
     link += "<a href=/about>關於允蓁</a><br>"
@@ -56,16 +58,19 @@ def index():
     link += "<a href='/traffic'>台中市十大肇事路口查詢</a><br>"
     link += "<a href='/weather'>查詢縣市天氣</a><br>"
     link += "<a href='/rate'>本週新片進DB</a><br>"
+
+    link += '<script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>'
+    link += '<df-messenger intent="WELCOME" chat-title="許允蓁(行銷四B)的聊天機器人" agent-id="74b4f6e1-e760-47d2-a4b4-149b3dbddcfa" language-code="zh-tw"></df-messenger>'
+
     return link
 
 @app.route("/webhook4", methods=["POST"])
 def webhook4():
     req = request.get_json(force=True)
     action = req.get("queryResult", {}).get("action")
-    info = "我不確定你想執行的動作是什麼呢。"  # 預設回覆
+    info = "我不確定你想執行的動作是什麼呢。"  
 
     if action == "rateChoice":
-        # 你的 webhook4 如果還沒寫好 rateChoice 的邏輯，一定要加個 pass 佔位，才不會跳 IndentationError 錯誤
         pass 
         
     elif action == "MovieDetail":

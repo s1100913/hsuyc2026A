@@ -68,11 +68,31 @@ def index():
 def webhook4():
     req = request.get_json(force=True)
     action = req.get("queryResult", {}).get("action")
-    info = "我不確定你想執行的動作是什麼呢。"  
+    info = "我不確定你想執行的動作是什麼呢。"  # 預設回覆
 
+    # ===== 1. 查詢電影分級的邏輯 =====
     if action == "rateChoice":
-        pass 
+        # 抓取 Dialogflow 傳來的分級參數 (例如：普遍級)
+        rate = req.get("queryResult", {}).get("parameters", {}).get("rate", "")
         
+        # 為了避免使用者只打「普級」，我們可以做個小防呆，把它轉成資料庫標準名稱
+        if rate == "普級":
+            rate = "普遍級"
+
+        db = firestore.client()
+        movies_ref = db.collection("本週新片含分級") 
+        query = movies_ref.where("rate", "==", rate).stream()
+        
+        movie_list = []
+        for doc in query:
+            movie_list.append(doc.to_dict().get("title", ""))
+        
+        if movie_list:
+            movies_str = "、\n".join(movie_list)
+            info = f"為您查詢到分級為【{rate}】的電影有：\n\n{movies_str}"
+        else:
+            info = f"目前資料庫中沒有【{rate}】的電影喔！"
+            
     elif action == "MovieDetail":
         question = req.get("queryResult", {}).get("parameters", {}).get("filmq", "")
         keyword = req.get("queryResult", {}).get("parameters", {}).get("any", "")
@@ -80,12 +100,12 @@ def webhook4():
 
         if question == "片名":
             db = firestore.client()
-            collection_ref = db.collection("本週新片含分級")
+            collection_ref = db.collection("本週新片含分級") 
             docs = collection_ref.get()
             found = False
             
             for doc in docs:
-                movie_data = doc.to_dict()  # 避免使用 dict 作為變數名稱
+                movie_data = doc.to_dict()
                 if keyword in movie_data.get("title", ""):
                     found = True 
                     info += "片名：" + movie_data.get("title", "") + "\n"
@@ -98,9 +118,7 @@ def webhook4():
             if not found:
                 info += "很抱歉，目前無符合這個關鍵字的相關電影喔"
 
-    # 必須等上面所有的判斷和資料庫查詢都跑完，最後才 return 給 Dialogflow
     return make_response(jsonify({"fulfillmentText": info}))
-
 
 @app.route("/webhook2", methods=["POST"])
 def webhook2():

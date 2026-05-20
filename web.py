@@ -58,6 +58,45 @@ def index():
     link += "<a href='/rate'>本週新片進DB</a><br>"
     return link
 
+@app.route("/webhook4", methods=["POST"])
+def webhook4():
+    req = request.get_json(force=True)
+    action = req["queryResult"]["action"]
+    info = "我不確定你想執行的動作是什麼呢。"  # 預設回覆訊息
+
+    if (action == "rateChoice"):
+        # 如果這裡暫時沒有功能，放一個 pass 避免報錯
+        pass 
+        
+    elif (action == "MovieDetail"):
+        question = req.get("queryResult").get("parameters").get("filmq")
+        keyword = req.get("queryResult").get("parameters").get("any")
+        info = "我是許允蓁開發的電影聊天機器人，您要查詢電影的" + question + "，關鍵字是：" + keyword + "\n\n"
+
+        if (question == "片名"):
+            db = firestore.client()
+            collection_ref = db.collection("電影含分級")
+            docs = collection_ref.get()
+            found = False
+            
+            for doc in docs:
+                movie_data = doc.to_dict()  # 變數名稱從 dict 改為 movie_data 避免衝突
+                if keyword in movie_data["title"]:
+                    found = True 
+                    info += "片名：" + movie_data["title"] + "\n"
+                    info += "海報：" + movie_data["picture"] + "\n"
+                    info += "影片介紹：" + movie_data["hyperlink"] + "\n"
+                    info += "片長：" + str(movie_data["showLength"]) + " 分鐘\n"
+                    info += "分級：" + movie_data["rate"] + "\n" 
+                    info += "上映日期：" + movie_data["showDate"] + "\n\n"
+                    
+            if not found:
+                info += "很抱歉，目前無符合這個關鍵字的相關電影喔"
+
+    # 整個邏輯跑完，最後才 return 給對話機器人
+    return make_response(jsonify({"fulfillmentText": info}))
+
+
 @app.route("/webhook2", methods=["POST"])
 def webhook2():
     req = request.get_json(force=True)

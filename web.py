@@ -75,7 +75,7 @@ def webhook4():
 
         if question == "片名":
             db = firestore.client()
-            collection_ref = db.collection("電影含分級")
+            collection_ref = db.collection("本週新片含分級")
             docs = collection_ref.get()
             found = False
             

@@ -68,14 +68,11 @@ def index():
 def webhook4():
     req = request.get_json(force=True)
     action = req.get("queryResult", {}).get("action")
-    info = "我不確定你想執行的動作是什麼呢。"  # 預設回覆
+    info = "我不確定你想執行的動作是什麼呢。"
 
-    # ===== 1. 查詢電影分級的邏輯 =====
     if action == "rateChoice":
-        # 抓取 Dialogflow 傳來的分級參數 (例如：普遍級)
         rate = req.get("queryResult", {}).get("parameters", {}).get("rate", "")
         
-        # 為了避免使用者只打「普級」，我們可以做個小防呆，把它轉成資料庫標準名稱
         if rate == "普級":
             rate = "普遍級"
 
@@ -89,9 +86,9 @@ def webhook4():
         
         if movie_list:
             movies_str = "、\n".join(movie_list)
-            info = f"為您查詢到分級為【{rate}】的電影有：\n\n{movies_str}"
+            info = f"我是許允蓁設計的電影聊天機器人，為您查詢到分級為【{rate}】的電影有：\n\n{movies_str}"
         else:
-            info = f"目前資料庫中沒有【{rate}】的電影喔！"
+            info = f"我是許允蓁設計的電影聊天機器人，目前資料庫中沒有【{rate}】的電影喔！"
             
     elif action == "MovieDetail":
         question = req.get("queryResult", {}).get("parameters", {}).get("filmq", "")
